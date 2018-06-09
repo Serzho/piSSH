@@ -1,5 +1,10 @@
 import paramiko
+
 import piSSH
+import user as u
+
+class user(u.user):
+    pass
 
 class client(paramiko.SSHClient):
     password = ''
@@ -35,7 +40,7 @@ class client(paramiko.SSHClient):
         except:
             print('Connection error!!!')
 
-    def command(self, sudo = False, returnInfo = True, command = ''):
+    def command(self, sudo = False, returnInfo = True, command = '', printInfo = True):
         if(sudo):
             command = "sudo " + command
         try:
@@ -44,10 +49,12 @@ class client(paramiko.SSHClient):
             if(sudo):
                 stdin.write(self.password + '\n')
                 stdin.flush()
-            if(returnInfo):
+            if(printInfo):
                 print("RETURN: ")
                 for line in stdout.readlines():
                     print(line)
+            if(returnInfo):
+                return stdout.readlines()
         except:
             print('Command error!!!')
 
@@ -62,7 +69,20 @@ class client(paramiko.SSHClient):
         print('Shutdowning...')
         self.command(sudo = True, returnInfo = False, command = 'shutdown now')
     
-    def getAllConnectedUsers(self):
+    def getAllConnectedUsers(self, printInfo = False):
         print('Getting all connected users...')
-        self.command(sudo = False, returnInfo = True, command = 'w')
+        info = self.command(sudo = False, returnInfo = True, printInfo = False, command = 'w')
+        users = []
+        for i in range(len(info)-2):
+            users.append(user(info[i+2]))
+        if(printInfo):
+            for u in users:
+                print()
+                print('///////////////')
+                print('User IP: %s' % u.get()[0])
+                print('User Number: %s' % u.get()[1])
+                print('Time connection: %d:%d' % u.get()[2])
+                print('///////////////')
+                print()
+            
         
