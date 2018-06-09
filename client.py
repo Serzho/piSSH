@@ -12,7 +12,8 @@ class client(paramiko.SSHClient):
     ip = ''
     name = ''
     status = 'none'
-
+    users = []
+    
     def updateStatus(self, status):
         self.status = status
         print(self.status)
@@ -34,7 +35,8 @@ class client(paramiko.SSHClient):
             self.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
             print('Connecting...')
-            self.connect(self.ip, username = self.name, password = self.password, port = self.port)
+            self.connect(self.ip, username = self.name, password = self.password,\
+                         port = self.port)
             print('Success!!!')
             self.updateStatus('Connected')
         except:
@@ -72,17 +74,34 @@ class client(paramiko.SSHClient):
     def getAllConnectedUsers(self, printInfo = False):
         print('Getting all connected users...')
         info = self.command(sudo = False, returnInfo = True, printInfo = False, command = 'w')
-        users = []
-        for i in range(len(info)-2):
-            users.append(user(info[i+2]))
-        if(printInfo):
-            for u in users:
-                print()
-                print('///////////////')
-                print('User IP: %s' % u.get()[0])
-                print('User Number: %s' % u.get()[1])
-                print('Time connection: %d:%d' % u.get()[2])
-                print('///////////////')
-                print()
-            
+        if(len(info)>2):
+            for i in range(len(info)-2):
+                self.users.append(user(info[i+2]))
+            if(printInfo):
+                for u in self.users:
+                    print()
+                    print('///////////////')
+                    print('User IP: %s' % u.get()[0])
+                    print('User Number: %s' % u.get()[1])
+                    print('Time connection: %d:%d' % u.get()[2])
+                    print('///////////////')
+                    print()
+        else:
+            print('No one connected user!!!')
+
+    def kick(self, u):
+        self.command(returnInfo = False, printInfo = False, \
+                                command = ('skill -KILL -t pts/' + u.get()[1]))
+        print('User IP: %s was kicked!!!' % u.get()[0])
+    
+    def kickAllUsers(self, allowUsers = u.user()):
+        for u in self.users:
+            if(type(allowUsers)=='list'):
+                for aU in allowUsers:
+                    if(u.ip != aU.ip):
+                        self.kick(aU)
+            else:
+                if(allowUsers.ip != u.ip):
+                    self.kick(u)
         
+
