@@ -1,8 +1,8 @@
 import piSSH
 selfUser = piSSH.user()
-selfUser.set(ip = '192.168.1.104')
+selfUser.set(ip = '')
 client = piSSH.client()
-client.set(ip = '192.168.1.101')
+client.set(ip = '')
 client.connecting(AutoAddPolicy = True)
 client.getAllConnectedUsers(printInfo = True)
 client.kickAllUsers(allowUsers = selfUser)
