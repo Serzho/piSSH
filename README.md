@@ -1,5 +1,12 @@
 # piSSH
-Library for more easier using ssh + raspberrry in python3 
+Библиотека направленная на упрощение работы с протокола ssh с raspberry pi
 
 # example
-For test with example.py if u have default name and password of ur raspberry u need to set ip of ur Raspberry pi, in other case u need to set that too in set()!
+Пример работы в example.py:
+Создается обьект класса user которому задаем только свой ip
+Далее создаем обьект класса client которому задаем ip raspberry и если 
+стандартные имя или пароль были изменены, их тоже нужно задать.
+Затем устанавливается автомотическое добавление HostKeys в известные,
+потом выводятся все подключенные к нашему клиенту пользователи,
+и в конце кикаем всех пользователей, передавая методу client.kickAllUsers()
+единственного разрешенного пользователя!
