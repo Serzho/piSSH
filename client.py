@@ -105,7 +105,8 @@ class client(paramiko.SSHClient):
                 if(printInfo):
                     print('No one connected user!!!')
         else:
-            print('Error: Not connected to server!!!')
+            if(printInfo):
+                print('Error: Not connected to server!!!')
 
     def kick(self, u):
         self.command(returnInfo = False, printInfo = False, \
