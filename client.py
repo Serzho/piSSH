@@ -22,7 +22,6 @@ class client(paramiko.SSHClient):
     status = 'none'
     users = []
 
-    
     def updateStatus(self, status):
         self.status = status
         print(self.status)
@@ -89,8 +88,7 @@ class client(paramiko.SSHClient):
                 self.users.clear()
             if(printInfo):
                 print('Getting all connected users...')
-            pi = printInfo
-            info = self.command(sudo = False, returnInfo = True, printInfo = pi, command = 'w')
+            info = self.command(sudo = False, returnInfo = True, printInfo = False, command = 'w')
             if(len(info)>2):
                 for i in range(len(info)-2):
                     self.users.append(user(info[i+2]))
@@ -104,7 +102,8 @@ class client(paramiko.SSHClient):
                         print('///////////////')
                         print()
             else:
-                print('No one connected user!!!')
+                if(printInfo):
+                    print('No one connected user!!!')
         else:
             print('Error: Not connected to server!!!')
 
@@ -114,9 +113,14 @@ class client(paramiko.SSHClient):
         print('User IP: %s was kicked!!!' % u.get()[0])
 
     def ban(self):
-        self.bthr = BanThr.BanningThread(name = self.ip)
+        self.bthr = BanThr.BanningThread(name = self.ip, pause = 1)
         self.bthr.setClient(c.copy(self))
+        self.bthr.start()
 
+    def stopBanning(self):
+        self.bthr.stop()
+        self.bthr.join()
+        
     def kickBannedUsers(self,ip):
         f = open("known_users/denyUsers%s" % self.ip,'r')
         denyUsers = f.readlines()
@@ -175,6 +179,4 @@ class client(paramiko.SSHClient):
         f.close()
         self.ban()
 
-        def stop(self):
-            bthr.stop()
         

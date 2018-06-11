@@ -11,7 +11,7 @@ try:
     while True:
         pass
 except:
-    client.stop()
+    client.stopBanning()
     print('CTRL + C pressed')
    
 #client.kickAllUsers(allowUsers = selfUser)
