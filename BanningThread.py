@@ -23,7 +23,7 @@ class BanningThread(threading.Thread):
                 self.client.getAllConnectedUsers()
                 self.client.kickBannedUsers(self.name)
             except:
-                print('End...')
+                pass
             time.sleep(self.pause)
         print('Thread %s stopped\n' % self.name)
 

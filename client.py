@@ -15,24 +15,18 @@ class bthr(BanThr.BanningThread):
     pass
 
 class client(paramiko.SSHClient):
-    password = ''
-    port = ''
-    ip = ''
-    name = ''
-    status = 'none'
-    users = []
-
-    def updateStatus(self, status):
-        self.status = status
-        print(self.status)
-
-    def set(self, password = 'raspberry' , port = '22', ip = '127.0.0.1', name = 'pi'):
+    def __init__(self, password = 'raspberry' , port = '22', ip = '127.0.0.1', name = 'pi'):
+        paramiko.SSHClient.__init__(self)
         self.password = password
         self.port = port
         self.ip = ip
         self.name = name
-        self.updateStatus('Setted')
-        
+        self.__updateStatus('Setted')
+        self._users = []
+
+    def __updateStatus(self, status):
+        self._status = status
+        print(self._status)      
     
     def connecting(self, AutoAddPolicy = False):
         if(self.name == 'pi' and self.password == 'raspberry'):
@@ -47,7 +41,7 @@ class client(paramiko.SSHClient):
             self.connect(self.ip, username = self.name, password = self.password,\
                          port = self.port)
             print('Success!!!')
-            self.updateStatus('Connected')
+            self.__updateStatus('Connected')
         except:
             print('Connection error!!!')
         self.ban()
@@ -72,19 +66,19 @@ class client(paramiko.SSHClient):
             print('Command error!!!')
 
     def reboot(self):
-        self.updateStatus('Disconnected')
+        self.__updateStatus('Disconnected')
         print('Rebooting....')
         self.command(sudo = True, returnInfo = False, command = 'reboot now')
         
 
     def shutdown(self):
-        self.updateStatus('Disconnected')
+        self.__updateStatus('Disconnected')
         print('Shutdowning...')
         self.command(sudo = True, returnInfo = False, command = 'shutdown now')
     
     def getAllConnectedUsers(self, printInfo = False):
-        if(self.status=='Connected'):
-            if(len(self.users) != 0):
+        if(self._status=='Connected'):
+            if(len(self._users) != 0):
                 self.users.clear()
             if(printInfo):
                 print('Getting all connected users...')
@@ -114,13 +108,13 @@ class client(paramiko.SSHClient):
         print('User IP: %s was kicked!!!' % u.get()[0])
 
     def ban(self):
-        self.bthr = BanThr.BanningThread(name = self.ip, pause = 1)
-        self.bthr.setClient(c.copy(self))
-        self.bthr.start()
+        self._bthr = BanThr.BanningThread(name = self.ip, pause = 1)
+        self._bthr.setClient(c.copy(self))
+        self._bthr.start()
 
     def stopBanning(self):
-        self.bthr.stop()
-        self.bthr.join()
+        self._bthr.stop()
+        self._bthr.join()
         
     def kickBannedUsers(self,ip):
         f = open("known_users/denyUsers%s" % self.ip,'r')
