@@ -4,6 +4,9 @@
 import paramiko
 import BanningThread as BanThr
 import copy as c
+import subprocess as sp
+import time
+
 
 import piSSH
 import user as u
@@ -15,35 +18,49 @@ class bthr(BanThr.BanningThread):
     pass
 
 class client(paramiko.SSHClient):
-    def __init__(self, password = 'raspberry' , port = '22', ip = '127.0.0.1', name = 'pi'):
+    def __init__(self, password = 'raspberry' , port = '22', ip = '127.0.0.1', name = 'pi', printInfo = True):
         paramiko.SSHClient.__init__(self)
         self.password = password
         self.port = port
         self.ip = ip
         self.name = name
-        self.__updateStatus('Setted')
+        pI = printInfo
+        self.__updateStatus('Setted', printInfo)
         self._users = []
 
-    def __updateStatus(self, status):
+    def __updateStatus(self, status, printInfo = True):
         self._status = status
-        print(self._status)      
+        if(printInfo):
+            print(self._status)      
     
-    def connecting(self, AutoAddPolicy = False):
+    def connecting(self, AutoAddPolicy = False, password = '', returnInfo = False, printInfo = True):
+        if(password != ''):
+            self.password = password
         if(self.name == 'pi' and self.password == 'raspberry'):
-            print("Connecting with default parameters...")
+            if(printInfo):
+                print("Connecting with default parameters...")
         else:
-            print("Connecting with given parameters...")
+            if(printInfo):
+                print("Connecting with given parameters...")
         if(AutoAddPolicy):
-            print('Auto add in known_hosts!')
+            if(printInfo):
+                print('Auto add in known_hosts!')
             self.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            print('Connecting...')
+            if(printInfo):
+                print('Connecting...')
             self.connect(self.ip, username = self.name, password = self.password,\
                          port = self.port)
-            print('Success!!!')
+            if(returnInfo):
+                return True
+            if(printInfo):
+                print('Success!!!')
             self.__updateStatus('Connected')
         except:
-            print('Connection error!!!')
+            if(returnInfo):
+                return False
+            if(printInfo):
+                print('Connection error!!!')
         self.ban()
 
     def command(self, sudo = False, returnInfo = True, command = '', printInfo = True):
@@ -85,9 +102,9 @@ class client(paramiko.SSHClient):
             info = self.command(sudo = False, returnInfo = True, printInfo = False, command = 'w')
             if(len(info)>2):
                 for i in range(len(info)-2):
-                    self.users.append(user(info[i+2]))
+                    self._users.append(user(info[i+2]))
                 if(printInfo):
-                    for u in self.users:
+                    for u in self._users:
                         print()
                         print('///////////////')
                         print('User IP: %s' % u.get()[0])
@@ -158,7 +175,6 @@ class client(paramiko.SSHClient):
                     already = False
         else:
             if(info == '0.0.0.0'):
-                print('ityity')
                 print(banUsers)
                 f.write('%s\n' % banUsers)
             else:
@@ -166,7 +182,6 @@ class client(paramiko.SSHClient):
                     if(line == banUsers):
                         already = True
                 if(not already):
-                    print('mmnmm')
                     print(banUsers)
                     f.write('%s\n' % banUsers)
                 else:
@@ -174,4 +189,16 @@ class client(paramiko.SSHClient):
         f.close()
         self.ban()
 
-        
+    def findPassword(self, countThreads = 3):
+        info = sp.check_output('python3 password.py %d %s %s %s' % \
+                                        (countThreads, self.ip, self.name, self.port), shell = True)
+        out = ''
+        for line in info:
+            out += chr(line)
+        print(out)
+        try:
+            f = open('temp.txt', 'r')
+            self.password = f.read()
+            f.close()
+        except:
+            print('No password fined')

@@ -3,6 +3,7 @@ import piSSH
 selfUser = piSSH.user()
 selfUser.set(ip = '192.168.1.101')
 client = piSSH.client(ip = '192.168.1.102')
+client.findPassword()
 client.connecting(AutoAddPolicy = True)
 client.getAllConnectedUsers(printInfo = True)
 client.banUsers(banUsers = ['192.442.2.11','192.168.1.103'])
