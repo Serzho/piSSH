@@ -64,7 +64,7 @@ class client(paramiko.SSHClient):
                 print('Connection error!!!')
         self.ban()
 
-    def command(self, sudo = False, returnInfo = True, command = '', printInfo = True):
+    def command(self, sudo = False, returnInfo = True, command = '', printInfo = True, inputting = ''):
         if(sudo):
             command = "sudo " + command
         try:
@@ -74,6 +74,14 @@ class client(paramiko.SSHClient):
             if(sudo):
                 stdin.write(self.password + '\n')
                 stdin.flush()
+            if(type(inputting) == 'list'):
+                for line in inputting:
+                    stdin.write(line + '\n')
+                    stdin.flush()
+            else:
+                if(inputting != ''):
+                    stdin.write(inputting + '\n')
+                    stdin.flush()
             if(printInfo):
                 print("RETURN: ")
                 for line in stdout.readlines():
