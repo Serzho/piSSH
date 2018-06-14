@@ -89,7 +89,8 @@ class client(paramiko.SSHClient):
             if(returnInfo):
                 return stdout.readlines()
         except:
-            print('Command error!!!')
+            if(returnInfo):
+                print('Command error!!!')
 
     def reboot(self):
         self.__updateStatus('Disconnected')
@@ -104,7 +105,7 @@ class client(paramiko.SSHClient):
     def getAllConnectedUsers(self, printInfo = False):
         if(self._status=='Connected'):
             if(len(self._users) != 0):
-                self.users.clear()
+                self._users.clear()
             if(printInfo):
                 print('Getting all connected users...')
             info = self.command(sudo = False, returnInfo = True, printInfo = False, command = 'w')
@@ -211,11 +212,26 @@ class client(paramiko.SSHClient):
         except:
             print('No password fined')
 
-    def downloadFile(self, originalName = '', finalName = ''):
+    def downloadFile(self, originalName = '', finalName = '', isTree = False):
         if(self._status == 'Connected'):
+            if(isTree):
+                finalName = 'download/%s' % finalName.split('/')[len(finalName.split('/')) - 1]
+            else:
+                finalName = 'download/%s' % finalName
+            oN = originalName.split('/')
+            originalName = ''
+            oN.remove('home')
+            oN.remove(self.name)
+            oN.pop(0)
+            for i in range(len(oN)):
+                if(i == 0):
+                    originalName += oN[i]
+                else:
+                    originalName += '/' + oN[i]
+            print(originalName.split()[0])
             try:
-                self.sftp.get(originalName, finalName)
-                print('%s saved as %s' % (originalName, finalName))
+            self.sftp.get(originalName.split()[0], finalName)
+            print('%s saved as %s' % (originalName.split()[0], finalName))
             except:
                 print('Error download file...')
         else:
@@ -228,6 +244,29 @@ class client(paramiko.SSHClient):
             print('Error upload file...')
         else:
             print('No connection to server!!!')
+
+    def findFile(self, name = '', expansion = '.', printInfo = True):
+        self.command(returnInfo = False, printInfo = False, command = 'apt install locale', sudo = True)
+        self.command(returnInfo = False, printInfo = False, command = 'updatedb', sudo = True)
+        if(name != ''):
+            files = self.command(returnInfo = True, printInfo = False, command = 'locate %s%s'\
+                         % (name, expansion), sudo = True)
+        try:
+            if(type(files) == 'str'):
+                if(printInfo):
+                    if(files != 'None'):
+                        print('File was founded')
+                        print(files)
+                    else:
+                        print('File not found')        
+            else:
+                if(printInfo):
+                    print('A lot of files founded')
+                    for file in files:
+                        print(file)
+            return files
+        except:
+            print('Error finding files...')
 
     def close(self):
         self.sftp.close()
