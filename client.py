@@ -55,6 +55,7 @@ class client(paramiko.SSHClient):
                 return True
             if(printInfo):
                 print('Success!!!')
+            self.sftp = self.open_sftp()
             self.__updateStatus('Connected')
         except:
             if(returnInfo):
@@ -87,7 +88,6 @@ class client(paramiko.SSHClient):
         print('Rebooting....')
         self.command(sudo = True, returnInfo = False, command = 'reboot now')
         
-
     def shutdown(self):
         self.__updateStatus('Disconnected')
         print('Shutdowning...')
@@ -202,3 +202,25 @@ class client(paramiko.SSHClient):
             f.close()
         except:
             print('No password fined')
+
+    def downloadFile(self, originalName = '', finalName = ''):
+        if(self._status == 'Connected'):
+            try:
+                self.sftp.get(originalName, finalName)
+                print('%s saved as %s' % (originalName, finalName))
+            except:
+                print('Error download file...')
+        else:
+            print('No connection to server!!!')
+
+    def uploadFile(self, originalName = '', finalName = ''):
+        if(self._status == 'Connected'):
+            self.sftp.put(originalName, finalName)
+            print('%s uploaded as %s' % (originalName, finalName))
+            print('Error upload file...')
+        else:
+            print('No connection to server!!!')
+
+    def close(self):
+        self.sftp.close()
+        self.stopBanning()
