@@ -8,10 +8,8 @@ client.connecting(AutoAddPolicy = True)
 #client.command(command = 'pip3 install vk', inputting = 'y')
 client.getAllConnectedUsers(printInfo = True)
 client.allowUsers(['192.442.2.11',selfUser.get()[0]])
-files = client.findFile(name = 'example', expansion = '.py')
-for file in files:
-    client.downloadFile(originalName = file, finalName = file, isTree = True)
-    
+
+client.getFiles()
 try:
     while True:
         pass

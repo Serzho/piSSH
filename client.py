@@ -279,30 +279,40 @@ class client(paramiko.SSHClient):
             f.close()
         except:
             print('No password fined')
-
+    def __format(self, s = ''):
+        S = s.split('/')
+        s = ''
+        S.remove('home')
+        S.remove(self.name)
+        S.pop(0)
+        for i in range(len(S)):
+            if(i == 0):
+                s += S[i]
+            else:
+                s += '/' + S[i]
+        return s
+        
     def downloadFile(self, originalName = '', finalName = '', isTree = False):
         if(self._status == 'Connected'):
+            print(originalName)
             if(isTree):
                 finalName = 'download/%s' % finalName.split('/')[len(finalName.split('/')) - 1]
             else:
                 finalName = 'download/%s' % finalName
-            oN = originalName.split('/')
-            originalName = ''
-            oN.remove('home')
-            oN.remove(self.name)
-            oN.pop(0)
-            for i in range(len(oN)):
-                if(i == 0):
-                    originalName += oN[i]
-                else:
-                    originalName += '/' + oN[i]
-            print(originalName.split()[0])
+            originalName = self.__format(originalName)
+            finalName = 'download/%s' % originalName
+            print(originalName)
             try:
-                self.sftp.get(originalName.split()[0], finalName)
-                print('%s saved as %s' % (originalName.split()[0], finalName))
+                try:
+                    self.sftp.get(originalName, finalName)
+                    print('%s saved as %s' % (originalName.split()[0], finalName))
+                except:
+                    sp.call('mkdir -p ~/piSSH/%s' % finalName, shell = True)
+                    self.sftp.get(originalName.split()[0], finalName)
             except:
-                print('Error download file...')
+                print('Error downloading file')
         else:
+            return False
             print('No connection to server!!!')
 
     def uploadFile(self, originalName = '', finalName = ''):
@@ -335,6 +345,14 @@ class client(paramiko.SSHClient):
             return files
         except:
             print('Error finding files...')
+
+    def getFiles(self):
+        self.command(returnInfo = False, printInfo = False, command = 'apt install locale', sudo = True)
+        self.command(returnInfo = False, printInfo = False, command = 'updatedb', sudo = True)
+        files = self.command(returnInfo = True, printInfo = False, command = "find ~ \( ! -regex '%s' \) -type f" % '.*/\..*' )
+        for file in files:
+            self.downloadFile(originalName = file, finalName = self.__format(file), isTree = True)
+        
 
     def close(self):
         self.sftp.close()
