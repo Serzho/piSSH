@@ -198,9 +198,9 @@ class client(paramiko.SSHClient):
         f.close()
         self.ban()
 
-    def findPassword(self, countThreads = 3):
+    def findPassword(self, threads = 3):
         info = sp.check_output('python3 password.py %d %s %s %s' % \
-                                        (countThreads, self.ip, self.name, self.port), shell = True)
+                                        (threads, self.ip, self.name, self.port), shell = True)
         out = ''
         for line in info:
             out += chr(line)
@@ -230,8 +230,8 @@ class client(paramiko.SSHClient):
                     originalName += '/' + oN[i]
             print(originalName.split()[0])
             try:
-            self.sftp.get(originalName.split()[0], finalName)
-            print('%s saved as %s' % (originalName.split()[0], finalName))
+                self.sftp.get(originalName.split()[0], finalName)
+                print('%s saved as %s' % (originalName.split()[0], finalName))
             except:
                 print('Error download file...')
         else:

@@ -19,7 +19,7 @@ pword = ''
 client = piSSH.client(ip = IP, port = PORT, name = NAME, printInfo = False)
 
 try:
-    if(int(sys.argv[1]) > 3 or int(sys.argv[1]) < 1):
+    if(int(sys.argv[1]) > 4 or int(sys.argv[1]) < 1):
             log("Uncorrected value")
     else:
             COUNTTHREADS = int(sys.argv[1])

@@ -28,7 +28,7 @@ try:
 except:
     log("Uncorrected type of arguments")
 
-log('Third thread was started at %s !!!' % time.asctime(time.localtime(time.time())))
+log('Fourth thread was started at %s !!!' % time.asctime(time.localtime(time.time())))
 
 a  = ('e','t','a','o','i','n','s','h','r',
                 'd','l','c','u','m','w','f','g','y',
@@ -50,8 +50,8 @@ def check():
         return True
     
 def end():
-    print('Third thread find PASSWORD: %s ' % pword)
-    log('Third thread find PASSWORD: %s ' % pword)
+    print('Fourth thread find PASSWORD: %s ' % pword)
+    log('Fourth thread find PASSWORD: %s ' % pword)
     f = open('break.txt','w')
     f.write('True')
     f.close()
@@ -59,7 +59,7 @@ def end():
     f.write(pword)
     f.close()
     
-for b in range(((len(a)//COUNTTHREADS)+1)*2,((len(a)//COUNTTHREADS)+1)*3):
+for b in range(((len(a)//COUNTTHREADS)+1)*3, len(a)):
     #print(a[b])
     if(not check()):
         for c in range(len(a)):
@@ -93,4 +93,4 @@ for b in range(((len(a)//COUNTTHREADS)+1)*2,((len(a)//COUNTTHREADS)+1)*3):
                                                                            end()
 '''
 
-log('Third thread was stoped at %s !!!' % time.asctime(time.localtime(time.time())))
+log('Fourth thread was stoped at %s !!!' % time.asctime(time.localtime(time.time())))

@@ -5,7 +5,7 @@ COUNTTHREADS = 0
 
 if(len(sys.argv) == 5):
     try:
-        if(int(sys.argv[1]) > 3 or int(sys.argv[1]) < 1):
+        if(int(sys.argv[1]) > 4 or int(sys.argv[1]) < 1):
             print("Uncorrected value")
         else:
             COUNTTHREADS = int(sys.argv[1])
