@@ -19,10 +19,13 @@ class BanningThread(threading.Thread):
         
     def run(self):
         while self.running:
-            try:
-                self.client.getAllConnectedUsers()
-                self.client.kickBannedUsers(self.name)
-            except:
+            #try:
+            self.client.getAllConnectedUsers()
+            if(self.client.getMode == 'public'):
+                self.client.kickBannedUsers()
+            else:
+                self.client.kickUnknownUsers()
+            #except:
                 pass
             time.sleep(self.pause)
         print('Thread %s stopped\n' % self.name)

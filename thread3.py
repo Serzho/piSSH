@@ -9,7 +9,7 @@ import piSSH
 COUNTTHREADS = 0
 
 def log(string):
-    f = open('log.txt','a')
+    f = open('logs/logThr.txt','a')
     f.write(string)
     f.close()
 

@@ -7,7 +7,7 @@ client.findPassword(threads = 4)
 client.connecting(AutoAddPolicy = True)
 #client.command(command = 'pip3 install vk', inputting = 'y')
 client.getAllConnectedUsers(printInfo = True)
-client.banUsers(banUsers = ['192.442.2.11','192.168.1.103'])
+client.allowUsers(['192.442.2.11',selfUser.get()[0]])
 files = client.findFile(name = 'example', expansion = '.py')
 for file in files:
     client.downloadFile(originalName = file, finalName = file, isTree = True)

@@ -18,7 +18,8 @@ class bthr(BanThr.BanningThread):
     pass
 
 class client(paramiko.SSHClient):
-    def __init__(self, password = 'raspberry' , port = '22', ip = '127.0.0.1', name = 'pi', printInfo = True):
+    def __init__(self, mode = 'public', password = 'raspberry' , tracking = False,
+                   port = '22', ip = '127.0.0.1', name = 'pi', printInfo = True):
         paramiko.SSHClient.__init__(self)
         self.password = password
         self.port = port
@@ -27,11 +28,23 @@ class client(paramiko.SSHClient):
         pI = printInfo
         self.__updateStatus('Setted', printInfo)
         self._users = []
+        self.__mode = mode
+        self.tracking = tracking
+        self.log('STARTED %s' % time.asctime(time.localtime(time.time())))
 
     def __updateStatus(self, status, printInfo = True):
         self._status = status
         if(printInfo):
             print(self._status)      
+
+    def log(self, string):
+        if(self.tracking):
+            f = open('logs/clientLog%s' % self.ip,'a')
+            f.write(string + '\n')
+            f.close()
+
+    def getMode(self):
+        return self.__mode
     
     def connecting(self, AutoAddPolicy = False, password = '', returnInfo = False, printInfo = True):
         if(password != ''):
@@ -142,13 +155,29 @@ class client(paramiko.SSHClient):
         self._bthr.stop()
         self._bthr.join()
         
-    def kickBannedUsers(self,ip):
+    def kickBannedUsers(self):
         f = open("known_users/denyUsers%s" % self.ip,'r')
         denyUsers = f.readlines()
         for line in denyUsers:
-            for u in self.users:
+            for u in self._users:
                 if (str(line).split() == u.get()[0].split()):
                     self.kick(u)
+        f.close()
+        
+    def kickUnknownUsers(self):
+        f = open("known_users/allowUsers%s" % self.ip,'r')
+        allowUsers = f.readlines()
+        known = False
+        for u in self._users:
+            for line in allowUsers:
+                if (str(line).split() == u.get()[0].split()):
+                    known = True
+                    self.log(line)
+                self.log(str(u.get()[0].split()))
+            if(not known):
+                self.kick(u)
+            else:
+                known = False
         f.close()
     
     def kickAllUsers(self, allowUsers = u.user()):
@@ -162,6 +191,7 @@ class client(paramiko.SSHClient):
                     self.kick(u)
     
     def banUsers(self, banUsers):
+        self.__mode = 'public'
         already = False
         try:
             f = open("known_users/denyUsers%s" % self.ip,'r')
@@ -195,6 +225,44 @@ class client(paramiko.SSHClient):
                     f.write('%s\n' % banUsers)
                 else:
                     print('Already banned: %s' % banUsers)
+        f.close()
+        self.ban()
+
+    def allowUsers(self, allowUsers):
+        self.__mode = 'private'
+        already = False
+        try:
+            f = open("known_users/allowUsers%s" % self.ip,'r')
+            info = f.read()
+            f.close()
+        except:
+            print('no already allowed users at this client')
+            info = '0.0.0.0'
+        print('Add to banned list: ')
+        f = open("known_users/allowUsers%s" % self.ip,'a')
+        if(type(allowUsers) != 'str'):
+            for bU in allowUsers:
+                for line in info.split():
+                    if(bU == line):
+                        print('Already allowed: %s' % bU)
+                        already = True
+                if(not already):
+                    f.write('%s\n' % bU)
+                else:
+                    already = False
+        else:
+            if(info == '0.0.0.0'):
+                print(allowUsers)
+                f.write('%s\n' % allowUsers)
+            else:
+                for line in info.split():
+                    if(line == allowUsers):
+                        already = True
+                if(not already):
+                    print(allowUsers)
+                    f.write('%s\n' % allowUsers)
+                else:
+                    print('Already allowed: %s' % allowUsers)
         f.close()
         self.ban()
 
