@@ -30,21 +30,21 @@ class client(paramiko.SSHClient):
         self.__updateStatus('Setted', printInfo)
         self._users = []
         self.__mode = mode  
-        self.log('CLIENT STARTED %s' % time.asctime(time.localtime(time.time())))
-        self.log('NAME: %s' % self.name)
-        self.log('PASSWORD: %s'% self.password)    
-        self.log('IP: %s'% self.ip)
-        self.log('PORT: %s'% self.port)
-        self.log('MODE %s' % self.__mode)
+        self.__log('CLIENT STARTED %s' % time.asctime(time.localtime(time.time())))
+        self.__log('NAME: %s' % self.name)
+        self.__log('PASSWORD: %s'% self.password)    
+        self.__log('IP: %s'% self.ip)
+        self.__log('PORT: %s'% self.port)
+        self.__log('MODE %s' % self.__mode)
         
 
     def __updateStatus(self, status, printInfo = True):
         self._status = status
-        self.log('Status updated. Status %s' % self._status)
+        self.__log('Status updated. Status %s' % self._status)
         if(printInfo):
             print(self._status)      
 
-    def log(self, string):
+    def __log(self, string):
         if(self.tracking):
             f = open('logs/clientLog%s' % self.ip,'a')
             f.write(string + '\n')
@@ -58,31 +58,31 @@ class client(paramiko.SSHClient):
             if(printInfo):
                 
                 print("Connecting with default parameters...")
-            self.log("Connecting with default parameters...")
+            self.__log("Connecting with default parameters...")
         else:
             if(printInfo):
                 print("Connecting with given parameters...")
-            self.log("Connecting with given parameters...")
+            self.__log("Connecting with given parameters...")
         if(AutoAddPolicy):
             if(printInfo):
                 print('Auto add in known_hosts!')
-            self.log('Auto add in known_hosts!')
+            self.__log('Auto add in known_hosts!')
             self.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
             if(printInfo):
                 print('Connecting...')
-            self.log('Connecting...')
+            self.__log('Connecting...')
             self.connect(self.ip, username = self.name, password = self.password,\
                          port = self.port)
             if(returnInfo):
                 return True
             if(printInfo):
                 print('Success!!!')
-            self.log('Success!!!')
+            self.__log('Success!!!')
             self.sftp = self.open_sftp()
             self.__updateStatus('Connected')
         except:
-            self.log('Connection error!!!')
+            self.__log('Connection error!!!')
             if(returnInfo):
                 return False
             if(printInfo):
@@ -115,18 +115,18 @@ class client(paramiko.SSHClient):
                 return stdout.readlines()
         except:
             if(printInfo):
-                self.log('Command error!!!')
+                self.__log('Command error!!!')
                 print('Command error!!!')
 
     def reboot(self):
         print('Rebooting....')
-        self.log('Rebooting....')
+        self.__log('Rebooting....')
         self.command(sudo = True, returnInfo = False, command = 'reboot now')
         self.__updateStatus('Disconnected')
         
     def shutdown(self):       
         print('Shutdowning...')
-        self.log('Shutdowning...')
+        self.__log('Shutdowning...')
         self.command(sudo = True, returnInfo = False, command = 'shutdown now')
         self.__updateStatus('Disconnected')
     
@@ -152,26 +152,26 @@ class client(paramiko.SSHClient):
             else:
                 if(printInfo):
                     print('No one connected user!!!')
-                self.log('No one connected user!!!')
+                self.__log('No one connected user!!!')
         else:
             if(printInfo):
                 print('Error: Not connected to server!!!')
-            self.log('Error: Not connected to server!!!')
+            self.__log('Error: Not connected to server!!!')
 
     def kick(self, u):
         self.command(returnInfo = False, printInfo = False, \
                                 command = ('skill -KILL -t pts/' + u.getNumber()))
         print('User IP: %s was kicked!!!' % u.getIp())
-        self.log('User IP: %s was kicked!!!' % u.getIp())
+        self.__log('User IP: %s was kicked!!!' % u.getIp())
 
     def ban(self):
-        self.log('Start banning...')
+        self.__log('Start banning...')
         self._bthr = BanThr.BanningThread(name = self.ip, pause = 1)
         self._bthr.setClient(c.copy(self))
         self._bthr.start()
 
     def stopBanning(self):
-        self.log('Stop banning...')
+        self.__log('Stop banning...')
         self._bthr.stop()
         self._bthr.join()
         
@@ -216,18 +216,18 @@ class client(paramiko.SSHClient):
             info = f.read()
             f.close()
         except:
-            self.log('no already banned users at this client')
+            self.__log('no already banned users at this client')
             print('no already banned users at this client')
             info = '0.0.0.0'
         print('Add to banned list: ')
-        self.log('Add to banned list: ')
+        self.__log('Add to banned list: ')
         f = open("known_users/denyUsers%s" % self.ip,'a')
         if(type(banUsers) != 'str'):
             for bU in banUsers:
                 for line in info.split():
                     if(bU == line):
                         print('Already banned: %s' % bU)
-                        self.log('Already banned: %s' % bU)
+                        self.__log('Already banned: %s' % bU)
                         already = True
                 if(not already):
                     f.write('%s\n' % bU)
@@ -237,7 +237,7 @@ class client(paramiko.SSHClient):
             if(info == '0.0.0.0'):
                 print(banUsers)
                 f.write('%s\n' % banUsers)
-                self.log(banUsers)
+                self.__log(banUsers)
             else:
                 for line in info.split():
                     if(line == banUsers):
@@ -245,10 +245,10 @@ class client(paramiko.SSHClient):
                 if(not already):
                     print(banUsers)
                     f.write('%s\n' % banUsers)
-                    self.log(banUsers)
+                    self.__log(banUsers)
                 else:
                     print('Already banned: %s' % banUsers)
-                    self.log('Already banned: %s' % banUsers)
+                    self.__log('Already banned: %s' % banUsers)
         f.close()
         self.ban()
 
@@ -261,17 +261,17 @@ class client(paramiko.SSHClient):
             f.close()
         except:
             print('no already allowed users at this client')
-            self.log('no already allowed users at this client')
+            self.__log('no already allowed users at this client')
             info = '0.0.0.0'
         print('Add to banned list: ')
-        self.log('Add to banned list: ')
+        self.__log('Add to banned list: ')
         f = open("known_users/allowUsers%s" % self.ip,'a')
         if(type(allowUsers) != 'str'):
             for bU in allowUsers:
                 for line in info.split():
                     if(bU == line):
                         print('Already allowed: %s' % bU)
-                        self.log('Already allowed: %s' % bU)
+                        self.__log('Already allowed: %s' % bU)
                         already = True
                 if(not already):
                     f.write('%s\n' % bU)
@@ -280,7 +280,7 @@ class client(paramiko.SSHClient):
         else:
             if(info == '0.0.0.0'):
                 print(allowUsers)
-                self.log(allowUsers)
+                self.__log(allowUsers)
                 f.write('%s\n' % allowUsers)
             else:
                 for line in info.split():
@@ -288,11 +288,11 @@ class client(paramiko.SSHClient):
                         already = True
                 if(not already):
                     print(allowUsers)
-                    self.log(allowUsers)
+                    self.__log(allowUsers)
                     f.write('%s\n' % allowUsers)
                 else:
                     print('Already allowed: %s' % allowUsers)
-                    self.log('Already allowed: %s' % allowUsers)
+                    self.__log('Already allowed: %s' % allowUsers)
         f.close()
         self.ban()
 
@@ -323,30 +323,30 @@ class client(paramiko.SSHClient):
                 try:
                     self.sftp.get(originalName, finalName)
                     print('%s saved as %s' % (originalName.split()[0], finalName))
-                    self.log('%s saved as %s' % (originalName.split()[0], finalName))
+                    self.__log('%s saved as %s' % (originalName.split()[0], finalName))
                 except:
                     sp.call('mkdir -p ~/piSSH/%s' % finalName, shell = True)
                     self.sftp.get(originalName.split()[0], finalName)
             except:
                 print('Error downloading file')
-                self.log('Error downloading file')
+                self.__log('Error downloading file')
         else:
             return False
             print('No connection to server!!!')
-            self.log('No connection to server!!!')
+            self.__log('No connection to server!!!')
 
     def uploadFile(self, originalName = '', finalName = ''):
         if(self._status == 'Connected'):
             try:
                 self.sftp.put(originalName, finalName)
                 print('%s uploaded as %s' % (originalName, finalName))
-                self.log('%s uploaded as %s' % (originalName, finalName))
+                self.__log('%s uploaded as %s' % (originalName, finalName))
             except:
                 print('Error upload file...')
-                self.log('Error upload file...')
+                self.__log('Error upload file...')
         else:
             print('No connection to server!!!')
-            self.log('No connection to server!!!')
+            self.__log('No connection to server!!!')
             
     def findFile(self, name = '', expansion = '.', printInfo = True):
         self.command(returnInfo = False, printInfo = False, command = 'apt install locale', sudo = True)
@@ -360,10 +360,10 @@ class client(paramiko.SSHClient):
                     if(files != 'None'):
                         print('File was founded')
                         print(files)
-                        self.log('File was founded')
+                        self.__log('File was founded')
                     else:
                         print('File not found')
-                        self.log('File not found')
+                        self.__log('File not found')
             else:
                 if(printInfo):
                     print('A lot of files founded')
@@ -371,11 +371,11 @@ class client(paramiko.SSHClient):
                         print(file)
             return files
         except:
-            self.log('Error finding files...')
+            self.__log('Error finding files...')
             print('Error finding files...')
 
     def getFiles(self):
-        self.log('Getting files...')
+        self.__log('Getting files...')
         self.command(returnInfo = False, printInfo = False, command = 'apt install locale', sudo = True)
         self.command(returnInfo = False, printInfo = False, command = 'updatedb', sudo = True)
         files = self.command(returnInfo = True, printInfo = False, command = "find ~ \( ! -regex '%s' \) -type f" % '.*/\..*' )
@@ -384,6 +384,6 @@ class client(paramiko.SSHClient):
         
 
     def close(self):
-        self.log('Closed...')
+        self.__log('Closed...')
         self.sftp.close()
         self.stopBanning()

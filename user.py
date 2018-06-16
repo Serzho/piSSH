@@ -20,5 +20,12 @@ class user():
         if(loginTime != self.loginTime):
             self.loginTime = loginTime
 
-    def get(self):
-        return (self.ip, self.number, self.loginTime)
+    def getIp(self):
+        return self.ip
+
+    def getNumber(self):
+        return self.number
+
+    def getLoginTime(self):
+        return self.loginTime
+        
