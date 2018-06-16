@@ -2,7 +2,7 @@ import piSSH
 
 selfUser = piSSH.user()
 selfUser.set(ip = '')
-client = piSSH.client(ip = '', password = '')
+client = piSSH.client(ip = '')
 client.connecting(AutoAddPolicy = True)
 client.command(command = 'ls', printInfo = True)
 client.getAllConnectedUsers(printInfo = True)
