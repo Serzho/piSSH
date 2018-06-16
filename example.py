@@ -2,8 +2,7 @@ import piSSH
 
 selfUser = piSSH.user()
 selfUser.set(ip = '192.168.1.104')
-client = piSSH.client(ip = '192.168.1.101')
-client.findPassword(threads = 4)
+client = piSSH.client(ip = '192.168.1.101', password = 'eete')
 client.connecting(AutoAddPolicy = True)
 #client.command(command = 'pip3 install vk', inputting = 'y')
 client.getAllConnectedUsers(printInfo = True)
