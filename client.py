@@ -89,7 +89,7 @@ class client(paramiko.SSHClient):
                 print('Connection error!!!')
         self.ban()
 
-    def command(self, sudo = False, returnInfo = True, command = '', printInfo = True, inputting = ''):
+    def command(self, sudo = False, returnInfo = False, command = '', printInfo = False, inputting = ''):
         if(sudo):
             command = "sudo " + command
         try:
@@ -114,8 +114,8 @@ class client(paramiko.SSHClient):
             if(returnInfo):
                 return stdout.readlines()
         except:
-            self.log('Command error!!!')
-            if(returnInfo):
+            if(printInfo):
+                self.log('Command error!!!')
                 print('Command error!!!')
 
     def reboot(self):
@@ -144,9 +144,9 @@ class client(paramiko.SSHClient):
                     for u in self._users:
                         print()
                         print('///////////////')
-                        print('User IP: %s' % u.get()[0])
-                        print('User Number: %s' % u.get()[1])
-                        print('Time connection: %d:%d' % u.get()[2])
+                        print('User IP: %s' % u.getIp())
+                        print('User Number: %s' % u.getNumber())
+                        print('Time connection: %d:%d' % u.getLoginTime())
                         print('///////////////')
                         print()
             else:
@@ -160,9 +160,9 @@ class client(paramiko.SSHClient):
 
     def kick(self, u):
         self.command(returnInfo = False, printInfo = False, \
-                                command = ('skill -KILL -t pts/' + u.get()[1]))
-        print('User IP: %s was kicked!!!' % u.get()[0])
-        self.log('User IP: %s was kicked!!!' % u.get()[0])
+                                command = ('skill -KILL -t pts/' + u.getNumber()))
+        print('User IP: %s was kicked!!!' % u.getIp())
+        self.log('User IP: %s was kicked!!!' % u.getIp())
 
     def ban(self):
         self.log('Start banning...')
@@ -180,7 +180,7 @@ class client(paramiko.SSHClient):
         denyUsers = f.readlines()
         for line in denyUsers:
             for u in self._users:
-                if (str(line).split() == u.get()[0].split()):
+                if (str(line).split() == u.getIp().split()):
                     self.kick(u)
         f.close()
         
@@ -190,7 +190,7 @@ class client(paramiko.SSHClient):
         known = False
         for u in self._users:
             for line in allowUsers:
-                if (str(line).split() == u.get()[0].split()):
+                if (str(line).split() == u.getIp().split()):
                     known = True
             if(not known):
                 self.kick(u)
